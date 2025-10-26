@@ -17,7 +17,7 @@ export default function Home() {
 	const handleSpawn = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch("http://runable.woksh.com:3000/spawn", {
+			const response = await fetch("https://runable.woksh.com:3000/spawn", {
 				method: "POST",
 			});
 			const data = await response.json();
@@ -33,7 +33,7 @@ export default function Home() {
 	const handleStop = async (id: string) => {
 		setStoppingIds((prev) => new Set(prev).add(id));
 		try {
-			await fetch(`http://runable.woksh.com:3000/stop/${id}`, {
+			await fetch(`https://runable.woksh.com:3000/stop/${id}`, {
 				method: "POST",
 			});
 			setActives(actives.filter((active) => active.id !== id));
