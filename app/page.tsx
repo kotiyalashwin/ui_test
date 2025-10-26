@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { act, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,7 +18,7 @@ export default function Home() {
 	const handleSpawn = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch("https://runable.woksh.com:3000/spawn", {
+			const response = await fetch("http://runable.woksh.com/spawn", {
 				method: "POST",
 			});
 			const data = await response.json();
@@ -29,11 +30,10 @@ export default function Home() {
 		}
 	};
 
-
 	const handleStop = async (id: string) => {
 		setStoppingIds((prev) => new Set(prev).add(id));
 		try {
-			await fetch(`https://runable.woksh.com:3000/stop/${id}`, {
+			await fetch(`http://runable.woksh.com/stop/${id}`, {
 				method: "POST",
 			});
 			setActives(actives.filter((active) => active.id !== id));
@@ -66,15 +66,17 @@ export default function Home() {
 							<Card key={active.id} className="p-4">
 								<div className="flex items-center justify-between">
 									<div className="overflow-hidden">
-										<p className="font-semibold mask-r-from-20%">ID: {active.id}</p>
+										<p className="font-semibold mask-r-from-20%">
+											ID: {active.id}
+										</p>
 										<p className="text-sm text-muted-foreground">
 											{active.preview}
 										</p>
 									</div>
 									<div className="flex gap-2">
-										<a href={active.preview} target="_blank">
+										<Link href={`http://${active.preview}`} target="_blank">
 											<Button variant="outline">Preview</Button>
-										</a>
+										</Link>
 										<Button
 											variant="destructive"
 											onClick={() => handleStop(active.id)}
