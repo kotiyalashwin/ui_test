@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { act, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 interface Active {
 	id: string;
-	preview: string;
 }
 interface CommandState {
 	input: string;
@@ -26,11 +24,11 @@ export default function Home() {
 	const handleSpawn = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch("https://runable.woksh.com/spawn", {
+			const response = await fetch("https://firecracker.woksh.com/vm/start", {
 				method: "POST",
 			});
 			const data = await response.json();
-			setActives([...actives, { id: data.id, preview: data.preview }]);
+			setActives([...actives, { id: data.id }]);
 		} catch (error) {
 			console.error("Error spawning container:", error);
 		} finally {
@@ -41,7 +39,7 @@ export default function Home() {
 	const handleStop = async (id: string) => {
 		setStoppingIds((prev) => new Set(prev).add(id));
 		try {
-			await fetch(`https://runable.woksh.com/stop/${id}`, {
+			await fetch(`https://firecracker.woksh.com/vm/stop?id=${id}`, {
 				method: "POST",
 			});
 			setActives(actives.filter((active) => active.id !== id));
@@ -65,15 +63,15 @@ export default function Home() {
 		}));
 
 		try {
-			const response = await fetch(`https://runable.woksh.com/exec/${id}`, {
+			const response = await fetch(`https://agent.woksh.com/run?id=${id}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ command }),
+				body: JSON.stringify({ prompt : command }),
 			});
 			const data = await response.json();
 			setCommandStates((prev) => ({
 				...prev,
-				[id]: { ...prev[id], output: data.output || "", loading: false },
+				[id]: { ...prev[id], output: data.vmOutput || "", loading: false },
 			}));
 		} catch (error) {
 			console.error("Error executing command:", error);
@@ -116,14 +114,8 @@ export default function Home() {
 											<p className="font-semibold mask-r-from-20%">
 												ID: {active.id}
 											</p>
-											<p className="text-sm text-muted-foreground">
-												{active.preview}
-											</p>
 										</div>
 										<div className="flex gap-2">
-											<Link href={`http://${active.preview}`} target="_blank">
-												<Button variant="outline">Preview</Button>
-											</Link>
 											<Button
 												variant="destructive"
 												onClick={() => handleStop(active.id)}
@@ -138,7 +130,7 @@ export default function Home() {
 									<div className="space-y-3">
 										<div className="flex gap-2">
 											<Input
-												placeholder="Enter command (e.g., ls -a)"
+												placeholder="try :Show me the current directory"
 												value={commandStates[active.id]?.input || ""}
 												onChange={(e) =>
 													handleCommandInputChange(active.id, e.target.value)
